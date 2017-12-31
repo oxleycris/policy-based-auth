@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace PBA.Models.AccountViewModels
 {
@@ -36,5 +35,10 @@ namespace PBA.Models.AccountViewModels
         [DataType(DataType.Date)]
         [Display(Name = "Date of Birth")]
         public DateTime BirthDate { get; set; }
-  }
+
+        public string SelectedRoleId { set; get; }
+        [Required]
+        [Display(Name = "Role")]
+        public IEnumerable<SelectListItem> RolesList { get; set; } = new List<SelectListItem>();
+    }
 }
