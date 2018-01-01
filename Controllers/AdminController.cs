@@ -7,8 +7,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using PBA.Enums;
+using PBA.Extensions;
 using PBA.Models;
 using PBA.Models.Admin;
+using PBA.Models.ViewModels;
 using PBA.Models.ViewModels.Admin;
 
 namespace PBA.Controllers
@@ -41,12 +43,7 @@ namespace PBA.Controllers
         {
             var selectedUser = _userManager.FindByIdAsync(id).Result;
             var selectedUserClaims = _userManager.GetClaimsAsync(selectedUser).Result;
-            var accessRights = new List<AccessRightDto>();
-
-            foreach (var claim in Enum.GetValues(typeof(ClaimsEnum)))
-            {
-                accessRights.Add(new AccessRightDto { Name = claim.ToString() });
-            }
+            var accessRights = PopulateAccessRights();
 
             foreach (var accessRight in accessRights)
             {
@@ -88,6 +85,14 @@ namespace PBA.Controllers
             await _signInManager.RefreshSignInAsync(_userManager.FindByNameAsync(User.Identity.Name).Result);
 
             return View(model);
+        }
+
+        private IList<AccessRightDto> PopulateAccessRights()
+        {
+            return Enum.GetValues(typeof(AccessRightClaimsEnum))
+                       .Cast<AccessRightClaimsEnum>()
+                       .Select(claim => new AccessRightDto { Name = claim.GetDisplayName() })
+                       .ToList();
         }
     }
 }

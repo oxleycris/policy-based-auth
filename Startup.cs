@@ -71,14 +71,14 @@ namespace PBA
                 {
                     //policy.RequireAuthenticatedUser();
                     policy.RequireRole(RolesEnum.Developer.ToString());
-                    policy.RequireClaim(ClaimsEnum.CanAccessDeveloperSite.ToString());
+                    policy.RequireClaim(AccessRightClaimsEnum.CanAccessDeveloperSite.ToString());
                 });
 
                 options.AddPolicy(PolicysEnum.TesterRoleNoClaim.ToString(), policy => { policy.RequireRole(RolesEnum.Tester.ToString()); });
                 options.AddPolicy(PolicysEnum.TesterRoleWithClaim.ToString(), policy =>
                 {
                     policy.RequireRole(RolesEnum.Tester.ToString());
-                    policy.RequireClaim(ClaimsEnum.CanAccessTesterSite.ToString());
+                    policy.RequireClaim(AccessRightClaimsEnum.CanAccessTesterSite.ToString());
                 });
             });
 

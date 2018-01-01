@@ -286,28 +286,28 @@ namespace PBA.Controllers
                 case "Developer":
                     await _userManager.AddClaimsAsync(user, new List<Claim>
                     {
-                        new Claim(nameof(ClaimsEnum.CanAccessDeveloperSite), "true")
+                        new Claim(nameof(AccessRightClaimsEnum.CanAccessDeveloperSite), "true")
                     });
                     break;
 
                 case "Tester":
                     await _userManager.AddClaimsAsync(user, new List<Claim>
                     {
-                        new Claim(nameof(ClaimsEnum.CanAccessTesterSite), "true")
+                        new Claim(nameof(AccessRightClaimsEnum.CanAccessTesterSite), "true")
                     });
                     break;
 
                 case "Architect":
                     await _userManager.AddClaimsAsync(user, new List<Claim>
                     {
-                        new Claim(nameof(ClaimsEnum.CanAccessArchitectSite), "true")
+                        new Claim(nameof(AccessRightClaimsEnum.CanAccessArchitectSite), "true")
                     });
                     break;
 
                 case "Manager":
                     await _userManager.AddClaimsAsync(user, new List<Claim>
                     {
-                        new Claim(nameof(ClaimsEnum.CanAccessManagerSite), "true")
+                        new Claim(nameof(AccessRightClaimsEnum.CanAccessManagerSite), "true")
                     });
                     break;
             }

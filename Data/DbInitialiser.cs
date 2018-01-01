@@ -105,7 +105,7 @@ namespace PBA.Data
             {
                 logger.LogDebug($"Created default user `{email}` successfully");
 
-                foreach (var claim in Enum.GetValues(typeof(ClaimsEnum)))
+                foreach (var claim in Enum.GetValues(typeof(AccessRightClaimsEnum)))
                 {
                     await userManager.AddClaimAsync(user, new Claim(claim.ToString(), "true"));
                 }

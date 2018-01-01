@@ -7,7 +7,7 @@ namespace PBA.Extensions
 {
     public static class EnumExtensions
     {
-        // Call: Enum.GetValues(typeof(ClaimsEnum)).Cast<ClaimsEnum>().ToList()
+        // Call: Enum.GetValues(typeof(T)).Cast<T>().ToList()
         public static string GetDisplayName(this Enum enumValue)
         {
             return enumValue.GetType()
