@@ -1,4 +1,4 @@
-﻿namespace PBA.Models.Claims
+﻿namespace PBA.Enums
 {
     public enum ClaimsEnum
     {
@@ -6,7 +6,6 @@
         CanAccessTesterSite,
         CanAccessArchitectSite,
         CanAccessManagerSite,
-        CanAccessMarketingSite,
-
+        CanAccessMarketingSite
     }
 }

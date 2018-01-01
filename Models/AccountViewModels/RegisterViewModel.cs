@@ -36,9 +36,10 @@ namespace PBA.Models.AccountViewModels
         [Display(Name = "Date of Birth")]
         public DateTime BirthDate { get; set; }
 
-        public string SelectedRoleId { set; get; }
         [Required]
         [Display(Name = "Role")]
+        public string SelectedRoleId { set; get; }
+
         public IEnumerable<SelectListItem> RolesList { get; set; } = new List<SelectListItem>();
     }
 }

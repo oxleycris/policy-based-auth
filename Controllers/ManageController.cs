@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -9,7 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using PBA.Extensions;
 using PBA.Models;
 using PBA.Models.ManageViewModels;
 using PBA.Services;
@@ -102,6 +101,7 @@ namespace PBA.Controllers
             }
 
             StatusMessage = "Your profile has been updated";
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -123,9 +123,11 @@ namespace PBA.Controllers
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
             var email = user.Email;
+
             await _emailSender.SendEmailConfirmationAsync(email, callbackUrl);
 
             StatusMessage = "Verification email sent. Please check your email.";
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -145,6 +147,7 @@ namespace PBA.Controllers
             }
 
             var model = new ChangePasswordViewModel { StatusMessage = StatusMessage };
+
             return View(model);
         }
 
@@ -194,6 +197,7 @@ namespace PBA.Controllers
             }
 
             var model = new SetPasswordViewModel { StatusMessage = StatusMessage };
+
             return View(model);
         }
 
@@ -236,8 +240,8 @@ namespace PBA.Controllers
 
             var model = new ExternalLoginsViewModel { CurrentLogins = await _userManager.GetLoginsAsync(user) };
             model.OtherLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync())
-                .Where(auth => model.CurrentLogins.All(ul => auth.Name != ul.LoginProvider))
-                .ToList();
+                 .Where(auth => model.CurrentLogins.All(ul => auth.Name != ul.LoginProvider))
+                 .ToList();
             model.ShowRemoveButton = await _userManager.HasPasswordAsync(user) || model.CurrentLogins.Count > 1;
             model.StatusMessage = StatusMessage;
 
@@ -254,6 +258,7 @@ namespace PBA.Controllers
             // Request a redirect to the external login provider to link a login for the current user
             var redirectUrl = Url.Action(nameof(LinkLoginCallback));
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, _userManager.GetUserId(User));
+
             return new ChallengeResult(provider, properties);
         }
 
@@ -282,6 +287,7 @@ namespace PBA.Controllers
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
             StatusMessage = "The external login was added.";
+
             return RedirectToAction(nameof(ExternalLogins));
         }
 
@@ -303,6 +309,7 @@ namespace PBA.Controllers
 
             await _signInManager.SignInAsync(user, isPersistent: false);
             StatusMessage = "The external login was removed.";
+
             return RedirectToAction(nameof(ExternalLogins));
         }
 
@@ -318,7 +325,7 @@ namespace PBA.Controllers
             var model = new TwoFactorAuthenticationViewModel
             {
                 HasAuthenticator = await _userManager.GetAuthenticatorKeyAsync(user) != null,
-                Is2faEnabled = user.TwoFactorEnabled,
+                Is2FaEnabled = user.TwoFactorEnabled,
                 RecoveryCodesLeft = await _userManager.CountRecoveryCodesAsync(user),
             };
 
@@ -359,6 +366,7 @@ namespace PBA.Controllers
             }
 
             _logger.LogInformation("User with ID {UserId} has disabled 2fa.", user.Id);
+
             return RedirectToAction(nameof(TwoFactorAuthentication));
         }
 
@@ -405,17 +413,18 @@ namespace PBA.Controllers
             // Strip spaces and hypens
             var verificationCode = model.Code.Replace(" ", string.Empty).Replace("-", string.Empty);
 
-            var is2faTokenValid = await _userManager.VerifyTwoFactorTokenAsync(
-                user, _userManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
+            var is2faTokenValid = await _userManager.VerifyTwoFactorTokenAsync(user, _userManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
 
             if (!is2faTokenValid)
             {
                 ModelState.AddModelError("model.Code", "Verification code is invalid.");
+
                 return View(model);
             }
 
             await _userManager.SetTwoFactorEnabledAsync(user, true);
             _logger.LogInformation("User with ID {UserId} has enabled 2FA with an authenticator app.", user.Id);
+
             return RedirectToAction(nameof(GenerateRecoveryCodes));
         }
 

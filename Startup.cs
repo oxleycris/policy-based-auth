@@ -9,6 +9,7 @@ using PBA.Data;
 using PBA.Models;
 using PBA.Services;
 using System;
+using PBA.Enums;
 
 namespace PBA
 {
@@ -63,34 +64,22 @@ namespace PBA
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("IsCrisEmail", policy => policy.RequireClaim("Email", "cris.oxley@7layer.net"));
-                options.AddPolicy("IsCris", policy => policy.RequireClaim("GivenName", "Cris"));
-                options.AddPolicy("IsOverAge", policy => policy.RequireClaim("", ""));
-                options.AddPolicy("Admin", policy =>
-                {
-                    policy.RequireRole("Admin");
-                });
+                options.AddPolicy(PolicysEnum.Admin.ToString(), policy => { policy.RequireRole(RolesEnum.Admin.ToString()); });
 
-                options.AddPolicy("DevRoleWithClaim", policy =>
+                options.AddPolicy(PolicysEnum.DeveloperRoleNoClaim.ToString(), policy => { policy.RequireRole(RolesEnum.Developer.ToString()); });
+                options.AddPolicy(PolicysEnum.DeveloperRoleWithClaim.ToString(), policy =>
                 {
                     //policy.RequireAuthenticatedUser();
-                    policy.RequireRole("Developer");
-                    policy.RequireClaim("CanAccessDeveloperSite");
-
+                    policy.RequireRole(RolesEnum.Developer.ToString());
+                    policy.RequireClaim(ClaimsEnum.CanAccessDeveloperSite.ToString());
                 });
 
-                options.AddPolicy("DevRoleNoClaim", policy =>
+                options.AddPolicy(PolicysEnum.TesterRoleNoClaim.ToString(), policy => { policy.RequireRole(RolesEnum.Tester.ToString()); });
+                options.AddPolicy(PolicysEnum.TesterRoleWithClaim.ToString(), policy =>
                 {
-                    policy.RequireRole("Developer");
+                    policy.RequireRole(RolesEnum.Tester.ToString());
+                    policy.RequireClaim(ClaimsEnum.CanAccessTesterSite.ToString());
                 });
-
-                //options.AddPolicy("ContentsEditor", policy =>
-                //{
-                //    policy.AddAuthenticationSchemes("Cookie, Bearer");
-                //    policy.RequireAuthenticatedUser();
-                //    policy.RequireRole("Admin");
-                //    policy.RequireClaim("editor", "contents");
-                //});
             });
 
             // Add application services.

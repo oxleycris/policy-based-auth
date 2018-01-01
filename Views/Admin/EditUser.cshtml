@@ -32,7 +32,6 @@
             @for (var i = 0; i < Model.AccessRights.Count; i++)
             {
                 <div class="form-group">
-                    @Html.HiddenFor(model => model.AccessRights[i].Id)
                     @Html.HiddenFor(model => model.AccessRights[i].Name)
                     @Html.CheckBoxFor(model => model.AccessRights[i].Selected)
                     @Html.LabelFor(model => model.AccessRights[i].Name, Model.AccessRights[i].Name)

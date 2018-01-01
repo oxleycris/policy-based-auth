@@ -12,6 +12,6 @@ namespace PBA.Models.ManageViewModels
 
         public int RecoveryCodesLeft { get; set; }
 
-        public bool Is2faEnabled { get; set; }
+        public bool Is2FaEnabled { get; set; }
     }
 }

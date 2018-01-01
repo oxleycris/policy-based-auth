@@ -52,7 +52,6 @@
               <label asp-for="RolesList"></label>
               @Html.DropDownListFor(x => x.SelectedRoleId, Model.RolesList, "Select")
               <span asp-validation-for="SelectedRoleId" class="text-danger"></span>
-              <span asp-validation-for="RolesList" class="text-danger"></span>
           </div>
 
           <button type="submit" class="btn btn-default">Register</button>

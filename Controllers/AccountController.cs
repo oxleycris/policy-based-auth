@@ -9,9 +9,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
+using PBA.Enums;
+using PBA.Extensions;
 using PBA.Models;
 using PBA.Models.AccountViewModels;
-using PBA.Models.Claims;
 using PBA.Services;
 
 namespace PBA.Controllers
@@ -47,10 +48,10 @@ namespace PBA.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login(string returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
+
             // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-
-            ViewData["ReturnUrl"] = returnUrl;
 
             return View();
         }
@@ -77,7 +78,7 @@ namespace PBA.Controllers
 
                 if (result.RequiresTwoFactor)
                 {
-                    return RedirectToAction(nameof(LoginWith2fa), new { returnUrl, model.RememberMe });
+                    return RedirectToAction(nameof(LoginWith2Fa), new { returnUrl, model.RememberMe });
                 }
 
                 if (result.IsLockedOut)
@@ -98,19 +99,19 @@ namespace PBA.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> LoginWith2fa(bool rememberMe, string returnUrl = null)
+        public async Task<IActionResult> LoginWith2Fa(bool rememberMe, string returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
+
             // Ensure the user has gone through the username & password screen first
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
 
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load two-factor authentication user.");
+                throw new ApplicationException("Unable to load two-factor authentication user.");
             }
 
-            var model = new LoginWith2faViewModel { RememberMe = rememberMe };
-
-            ViewData["ReturnUrl"] = returnUrl;
+            var model = new LoginWith2FaViewModel { RememberMe = rememberMe };
 
             return View(model);
         }
@@ -118,7 +119,7 @@ namespace PBA.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> LoginWith2fa(LoginWith2faViewModel model, bool rememberMe, string returnUrl = null)
+        public async Task<IActionResult> LoginWith2Fa(LoginWith2FaViewModel model, bool rememberMe, string returnUrl = null)
         {
             if (!ModelState.IsValid)
             {
@@ -159,15 +160,15 @@ namespace PBA.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> LoginWithRecoveryCode(string returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
+
             // Ensure the user has gone through the username & password screen first
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
 
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load two-factor authentication user.");
+                throw new ApplicationException("Unable to load two-factor authentication user.");
             }
-
-            ViewData["ReturnUrl"] = returnUrl;
 
             return View();
         }
@@ -186,7 +187,7 @@ namespace PBA.Controllers
 
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load two-factor authentication user.");
+                throw new ApplicationException("Unable to load two-factor authentication user.");
             }
 
             var recoveryCode = model.RecoveryCode.Replace(" ", string.Empty);
@@ -285,35 +286,28 @@ namespace PBA.Controllers
                 case "Developer":
                     await _userManager.AddClaimsAsync(user, new List<Claim>
                     {
-                        new Claim(ClaimsEnum.CanAccessDeveloperSite.ToString(), "true")
+                        new Claim(nameof(ClaimsEnum.CanAccessDeveloperSite), "true")
                     });
                     break;
 
                 case "Tester":
                     await _userManager.AddClaimsAsync(user, new List<Claim>
                     {
-                        new Claim(ClaimsEnum.CanAccessTesterSite.ToString(), "true")
+                        new Claim(nameof(ClaimsEnum.CanAccessTesterSite), "true")
                     });
                     break;
 
                 case "Architect":
                     await _userManager.AddClaimsAsync(user, new List<Claim>
                     {
-                        new Claim(ClaimsEnum.CanAccessArchitectSite.ToString(), "true")
+                        new Claim(nameof(ClaimsEnum.CanAccessArchitectSite), "true")
                     });
                     break;
 
                 case "Manager":
                     await _userManager.AddClaimsAsync(user, new List<Claim>
                     {
-                        new Claim(ClaimsEnum.CanAccessManagerSite.ToString(), "true")
-                    });
-                    break;
-
-                case "Marketing":
-                    await _userManager.AddClaimsAsync(user, new List<Claim>
-                    {
-                        new Claim(ClaimsEnum.CanAccessMarketingSite.ToString(), "true")
+                        new Claim(nameof(ClaimsEnum.CanAccessManagerSite), "true")
                     });
                     break;
             }
@@ -400,6 +394,8 @@ namespace PBA.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginViewModel model, string returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
+
             if (ModelState.IsValid)
             {
                 // Get the information about the user from the external login provider
@@ -428,8 +424,6 @@ namespace PBA.Controllers
                 }
                 AddErrors(result);
             }
-
-            ViewData["ReturnUrl"] = returnUrl;
 
             return View(nameof(ExternalLogin), model);
         }

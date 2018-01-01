@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using AutoMapper;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using PBA.Enums;
 using PBA.Models;
 using PBA.Models.Admin;
 using PBA.Models.ViewModels.Admin;
@@ -15,10 +17,12 @@ namespace PBA.Controllers
     public class AdminController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public AdminController(UserManager<ApplicationUser> userManager)
+        public AdminController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         public IActionResult Index()
@@ -35,19 +39,26 @@ namespace PBA.Controllers
 
         public IActionResult EditUser(string id)
         {
-            // TODO: To come from the database.
-            var accessRights = new List<AccessRightDto>
+            var selectedUser = _userManager.FindByIdAsync(id).Result;
+            var selectedUserClaims = _userManager.GetClaimsAsync(selectedUser).Result;
+            var accessRights = new List<AccessRightDto>();
+
+            foreach (var claim in Enum.GetValues(typeof(ClaimsEnum)))
             {
-                new AccessRightDto{ Id = 1, Name = "AccessRightA" },
-                new AccessRightDto{ Id = 2, Name = "AccessRightB" },
-                new AccessRightDto{ Id = 3, Name = "AccessRightC" },
-                new AccessRightDto{ Id = 4, Name = "AccessRightD" },
-                new AccessRightDto{ Id = 5, Name = "AccessRightE" }
-            };
+                accessRights.Add(new AccessRightDto { Name = claim.ToString() });
+            }
+
+            foreach (var accessRight in accessRights)
+            {
+                if (selectedUserClaims.Any(x => x.Type == accessRight.Name && x.Value == "true"))
+                {
+                    accessRight.Selected = true;
+                }
+            }
 
             var model = new EditUserViewModel
             {
-                User = _userManager.FindByIdAsync(id).Result,
+                User = selectedUser,
                 AccessRights = accessRights
             };
 
@@ -55,7 +66,7 @@ namespace PBA.Controllers
         }
 
         [HttpPost]
-        public IActionResult EditUser(EditUserViewModel model)
+        public async Task<IActionResult> EditUser(EditUserViewModel model)
         {
             var user = _userManager.FindByIdAsync(model.User.Id).Result;
             var currentClaims = _userManager.GetClaimsAsync(model.User).Result;
@@ -64,14 +75,17 @@ namespace PBA.Controllers
             {
                 if (!accessRight.Selected)
                 {
-                    _userManager.RemoveClaimAsync(user, new Claim(accessRight.Name, "true"));
+                    await _userManager.RemoveClaimAsync(user, new Claim(accessRight.Name, "true"));
                 }
 
                 if (accessRight.Selected && currentClaims.All(x => x.Type != accessRight.Name))
                 {
-                    _userManager.AddClaimAsync(user, new Claim(accessRight.Name, "true"));
+                    await _userManager.AddClaimAsync(user, new Claim(accessRight.Name, "true"));
                 }
             }
+
+            // Refresh the claims cookie by refreshing the sign-in process.
+            await _signInManager.RefreshSignInAsync(_userManager.FindByNameAsync(User.Identity.Name).Result);
 
             return View(model);
         }
